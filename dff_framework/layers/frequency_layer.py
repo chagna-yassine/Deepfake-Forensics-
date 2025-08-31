@@ -325,9 +325,13 @@ class FrequencyLayer(BaseForensicLayer):
             # Calculate distance from center
             distances = np.sqrt((x - center_x)**2 + (y - center_y)**2)
             
-            # Weighted average of distances
-            centroid = np.sum(distances * magnitude) / np.sum(magnitude)
-            centroids.append(centroid)
+            # Weighted average of distances with safety check
+            magnitude_sum = np.sum(magnitude)
+            if magnitude_sum > 0:
+                centroid = np.sum(distances * magnitude) / magnitude_sum
+                centroids.append(centroid)
+            else:
+                centroids.append(0.0)
         
         return np.mean(centroids)
     
@@ -361,8 +365,12 @@ class FrequencyLayer(BaseForensicLayer):
         autocorr = np.fft.ifft2(fft * np.conj(fft))
         autocorr = np.real(autocorr)
         
-        # Normalize autocorrelation
-        autocorr = autocorr / np.max(autocorr)
+        # Normalize autocorrelation with safety check
+        autocorr_max = np.max(autocorr)
+        if autocorr_max > 0:
+            autocorr = autocorr / autocorr_max
+        else:
+            autocorr = np.zeros_like(autocorr)
         
         # Look for strong periodic components
         h, w = autocorr.shape

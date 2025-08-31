@@ -40,8 +40,11 @@ class DeepfakeForensicsFramework:
         # Initialize chain of custody
         self._initialize_chain_of_custody(video_path)
         
-        # Run all registered layers
+        # Run all registered layers (except LLM layer)
         for layer_name, layer in self.layers.items():
+            if layer_name == 'LLM_Analysis_Layer':
+                continue  # Skip LLM layer for now
+                
             try:
                 print(f"Running {layer_name} analysis...")
                 layer_result = layer.analyze(video_path, options)
@@ -53,8 +56,35 @@ class DeepfakeForensicsFramework:
                     "error": str(e)
                 }
         
-        # Generate comprehensive report
+        # Generate initial forensic report
         report = self._generate_forensic_report()
+        
+        # Run LLM analysis if available
+        if 'LLM_Analysis_Layer' in self.layers:
+            try:
+                print("Running LLM expert analysis...")
+                llm_options = options.copy() if options else {}
+                llm_options['forensic_report'] = report
+                
+                llm_result = self.layers['LLM_Analysis_Layer'].analyze(video_path, llm_options)
+                self.results['LLM_Analysis_Layer'] = llm_result
+                
+                # Update report with LLM analysis
+                report['analysis_results']['LLM_Analysis_Layer'] = llm_result
+                if llm_result.get('status') == 'success':
+                    report['summary']['llm_risk_level'] = llm_result.get('risk_level', 'UNKNOWN')
+                    report['summary']['llm_verdict'] = llm_result.get('final_verdict', 'INCONCLUSIVE')
+                    
+            except Exception as e:
+                print(f"Error in LLM Analysis: {e}")
+                self.results['LLM_Analysis_Layer'] = {
+                    "status": "error",
+                    "error": str(e)
+                }
+                report['analysis_results']['LLM_Analysis_Layer'] = {
+                    "status": "error",
+                    "error": str(e)
+                }
         
         return report
     

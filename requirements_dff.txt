@@ -16,6 +16,7 @@ dlib>=19.22.0
 
 # Interface dependencies
 gradio>=4.0.0
+huggingface_hub>=0.20.0
 
 # Utility dependencies
 tqdm>=4.62.0
