@@ -12,6 +12,7 @@ from dff_framework.core.framework import DeepfakeForensicsFramework
 from dff_framework.layers.ai_layer_safe import SafeAILayer
 from dff_framework.layers.metadata_layer import MetadataLayer
 from dff_framework.layers.frequency_layer import FrequencyLayer
+from dff_framework.layers.physics_layer import PhysicsLayer
 
 class DFFGradioInterface:
     """
@@ -45,6 +46,17 @@ class DFFGradioInterface:
             'compression_quality_range': (30, 100)
         })
         self.framework.register_layer("Frequency_Layer", frequency_layer)
+        
+        # Register Physics Layer
+        physics_layer = PhysicsLayer({
+            'shadow_threshold': 0.3,
+            'reflection_threshold': 0.2,
+            'geometry_threshold': 0.1,
+            'continuity_threshold': 0.4,
+            'min_object_area': 1000,
+            'max_objects': 10
+        })
+        self.framework.register_layer("Physics_Layer", physics_layer)
         
         print("Analysis layers registered successfully")
     
@@ -169,6 +181,41 @@ class DFFGradioInterface:
             else:
                 text += f"🔍 FREQUENCY ANALYSIS: ERROR - {freq_result.get('error', 'Unknown error')}\n\n"
         
+        # Physics Layer results
+        if 'Physics_Layer' in analysis_results:
+            physics_result = analysis_results['Physics_Layer']
+            if physics_result.get('status') == 'success':
+                text += "🌍 PHYSICS ANALYSIS:\n"
+                text += f"  Frames Analyzed: {physics_result.get('frames_analyzed', 0)}\n"
+                text += f"  Confidence: {physics_result.get('confidence', 0):.3f}\n"
+                
+                # Shadow Analysis
+                shadow_analysis = physics_result.get('shadow_analysis', {})
+                text += f"  Shadow Inconsistencies: {'DETECTED' if shadow_analysis.get('shadow_inconsistencies') else 'None'}\n"
+                text += f"  Shadow Consistency: {shadow_analysis.get('shadow_consistency_score', 0):.3f}\n"
+                
+                # Reflection Analysis
+                reflection_analysis = physics_result.get('reflection_analysis', {})
+                text += f"  Reflection Inconsistencies: {'DETECTED' if reflection_analysis.get('reflection_inconsistencies') else 'None'}\n"
+                text += f"  Reflection Consistency: {reflection_analysis.get('reflection_consistency_score', 0):.3f}\n"
+                
+                # Geometry Analysis
+                geometry_analysis = physics_result.get('geometry_analysis', {})
+                text += f"  Geometry Inconsistencies: {'DETECTED' if geometry_analysis.get('geometry_inconsistencies') else 'None'}\n"
+                text += f"  Vanishing Point Consistency: {geometry_analysis.get('vanishing_point_consistency', 0):.3f}\n"
+                
+                # Object Continuity Analysis
+                continuity_analysis = physics_result.get('continuity_analysis', {})
+                text += f"  Continuity Violations: {'DETECTED' if continuity_analysis.get('continuity_violations') else 'None'}\n"
+                text += f"  Object Consistency: {continuity_analysis.get('object_consistency_score', 0):.3f}\n"
+                
+                # Summary
+                summary = physics_result.get('summary', {})
+                text += f"  Total Physics Issues: {summary.get('total_physics_inconsistencies', 0)}\n"
+                text += f"  Analysis Quality: {summary.get('analysis_quality', 'unknown')}\n\n"
+            else:
+                text += f"🌍 PHYSICS ANALYSIS: ERROR - {physics_result.get('error', 'Unknown error')}\n\n"
+        
         # Summary
         summary = results.get('summary', {})
         text += "📊 SUMMARY:\n"
@@ -283,9 +330,9 @@ class DFFGradioInterface:
             - 🤖 **AI Layer**: GenConViT model for deepfake detection
             - 📋 **Metadata Layer**: Basic file information analysis
             - 🔍 **Frequency Layer**: DCT/FFT analysis for compression artifacts and frequency anomalies
+            - 🌍 **Physics Layer**: Shadow, reflection, geometry, and object continuity analysis
             
             **Planned Layers:**
-            - 🌍 **Physics Analysis**: Shadow, reflection, and geometry consistency checks
             - 🎯 **Localization**: Spatial anomaly detection and heatmaps
             - 📊 **Explainability**: Attention maps and evidence visualization
             """)
