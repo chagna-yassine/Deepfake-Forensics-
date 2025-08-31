@@ -14,8 +14,6 @@ A comprehensive multi-layer analysis system for deepfake detection and forensic 
 - [API Reference](#api-reference)
 - [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## 🎯 Overview
 
@@ -483,7 +481,7 @@ The framework generates comprehensive results in multiple formats:
 
 For Contat, colaboration or questions:
 
-- **email**: yassinechagna01@gmail.com 
+- **Email**: yassinechagna01@gmail.com 
 
 ---
 
