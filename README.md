@@ -479,75 +479,12 @@ The framework generates comprehensive results in multiple formats:
 - Actionable recommendations
 - Evidence correlation
 
-## 🤝 Contributing
+## 📞 Contact
 
-We welcome contributions to the Deepfake Forensics Framework!
+For Contat, colaboration or questions:
 
-### Development Setup
-
-1. Fork the repository
-2. Create a feature branch
-3. Install development dependencies
-4. Make your changes
-5. Add tests
-6. Submit a pull request
-
-### Code Style
-
-- Follow PEP 8 guidelines
-- Use type hints
-- Add docstrings
-- Include unit tests
-
-### Testing
-
-```bash
-# Run all tests
-python -m pytest tests/
-
-# Run specific test
-python test_framework.py
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **GenConViT**: Advanced deepfake detection model
-- **Hugging Face**: LLM inference infrastructure
-- **Gradio**: Web interface framework
-- **OpenCV**: Computer vision processing
-- **PyTorch**: Deep learning framework
-
-## 📞 Support
-
-For support and questions:
-
-- **Issues**: Create a GitHub issue
-- **Documentation**: Check the wiki
-- **Community**: Join our discussions
-
-## 🔮 Roadmap
-
-### Upcoming Features
-
-- **Real-time Analysis**: Live video stream processing
-- **Batch Processing**: Multiple video analysis
-- **API Endpoints**: RESTful API for integration
-- **Mobile App**: iOS/Android applications
-- **Cloud Deployment**: Scalable cloud infrastructure
-
-### Research Areas
-
-- **Advanced AI Models**: Integration of newer detection models
-- **3D Analysis**: Depth and geometry analysis
-- **Audio Forensics**: Voice deepfake detection
-- **Blockchain Integration**: Immutable forensic records
+- **email**: yassinechagna01@gmail.com 
 
 ---
 
 **Deepfake Forensics Framework v1.0** - Built for the future of digital forensics.
-
-*Last updated: December 2024*
