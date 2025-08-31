@@ -11,6 +11,7 @@ sys.path.append(str(Path(__file__).parent))
 from dff_framework.core.framework import DeepfakeForensicsFramework
 from dff_framework.layers.ai_layer_safe import SafeAILayer
 from dff_framework.layers.metadata_layer import MetadataLayer
+from dff_framework.layers.frequency_layer import FrequencyLayer
 
 def demo_framework():
     """Demonstrate the framework functionality"""
@@ -29,9 +30,15 @@ def demo_framework():
         'num_frames': 15
     })
     metadata_layer = MetadataLayer()
+    frequency_layer = FrequencyLayer({
+        'dct_block_size': 8,
+        'fft_threshold': 0.1,
+        'compression_quality_range': (30, 100)
+    })
     
     framework.register_layer("AI_Layer", ai_layer)
     framework.register_layer("Metadata_Layer", metadata_layer)
+    framework.register_layer("Frequency_Layer", frequency_layer)
     
     print("✅ Analysis layers registered successfully\n")
     
@@ -102,6 +109,42 @@ def demo_framework():
                 print()
             else:
                 print(f"📋 METADATA ANALYSIS: ERROR - {meta_result.get('error', 'Unknown error')}")
+        
+        # Frequency Layer results
+        if 'Frequency_Layer' in analysis_results:
+            freq_result = analysis_results['Frequency_Layer']
+            if freq_result.get('status') == 'success':
+                print("🔍 FREQUENCY ANALYSIS:")
+                print(f"  Frames Analyzed: {freq_result.get('frames_analyzed', 0)}")
+                print(f"  Confidence: {freq_result.get('confidence', 0):.3f}")
+                
+                # DCT Analysis
+                dct_analysis = freq_result.get('dct_analysis', {})
+                print(f"  DCT Compression Artifacts: {'DETECTED' if dct_analysis.get('compression_artifacts_detected') else 'None'}")
+                print(f"  DCT Blocks Analyzed: {dct_analysis.get('dct_blocks_analyzed', 0)}")
+                
+                # FFT Analysis
+                fft_analysis = freq_result.get('fft_analysis', {})
+                print(f"  FFT Anomalies: {'DETECTED' if fft_analysis.get('frequency_anomalies_detected') else 'None'}")
+                print(f"  Frequency Consistency: {fft_analysis.get('frequency_consistency', 0):.3f}")
+                
+                # Compression Analysis
+                comp_analysis = freq_result.get('compression_analysis', {})
+                print(f"  Multiple Compression: {'DETECTED' if comp_analysis.get('multiple_compression_detected') else 'None'}")
+                print(f"  Avg Quality: {comp_analysis.get('average_compression_quality', 0):.3f}")
+                
+                # Frequency Anomalies
+                freq_anomalies = freq_result.get('frequency_anomalies', {})
+                print(f"  Manipulation Patterns: {'DETECTED' if freq_anomalies.get('manipulation_detected') else 'None'}")
+                print(f"  Anomaly Score: {freq_anomalies.get('average_anomaly_score', 0):.3f}")
+                
+                # Summary
+                summary = freq_result.get('summary', {})
+                print(f"  Total Anomalies: {summary.get('total_anomalies_detected', 0)}")
+                print(f"  Analysis Quality: {summary.get('analysis_quality', 'unknown')}")
+                print()
+            else:
+                print(f"🔍 FREQUENCY ANALYSIS: ERROR - {freq_result.get('error', 'Unknown error')}")
         
         # Summary
         summary = results.get('summary', {})

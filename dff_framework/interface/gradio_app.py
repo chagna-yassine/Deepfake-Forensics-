@@ -11,6 +11,7 @@ from pathlib import Path
 from dff_framework.core.framework import DeepfakeForensicsFramework
 from dff_framework.layers.ai_layer_safe import SafeAILayer
 from dff_framework.layers.metadata_layer import MetadataLayer
+from dff_framework.layers.frequency_layer import FrequencyLayer
 
 class DFFGradioInterface:
     """
@@ -37,6 +38,14 @@ class DFFGradioInterface:
         metadata_layer = MetadataLayer()
         self.framework.register_layer("Metadata_Layer", metadata_layer)
         
+        # Register Frequency Layer
+        frequency_layer = FrequencyLayer({
+            'dct_block_size': 8,
+            'fft_threshold': 0.1,
+            'compression_quality_range': (30, 100)
+        })
+        self.framework.register_layer("Frequency_Layer", frequency_layer)
+        
         print("Analysis layers registered successfully")
     
     def analyze_video(self, video_file, num_frames: int = 15, include_metadata: bool = True) -> tuple:
@@ -52,7 +61,7 @@ class DFFGradioInterface:
             Tuple of (results_text, results_json, recommendations)
         """
         if video_file is None:
-            return "Please upload a video file", "", ""
+            return "Please upload a video file", "{}", "Please upload a video file to begin analysis."
         
         try:
             # Prepare analysis options
@@ -66,14 +75,18 @@ class DFFGradioInterface:
             
             # Format results for display
             results_text = self._format_results_text(results)
-            results_json = json.dumps(results, indent=2)
+            try:
+                results_json = json.dumps(results, indent=2)
+            except (TypeError, ValueError) as json_error:
+                results_json = json.dumps({"error": f"JSON serialization failed: {str(json_error)}", "status": "error"}, indent=2)
             recommendations = self._format_recommendations(results)
             
             return results_text, results_json, recommendations
             
         except Exception as e:
             error_msg = f"Analysis failed: {str(e)}"
-            return error_msg, "", error_msg
+            error_json = json.dumps({"error": error_msg, "status": "failed"}, indent=2)
+            return error_msg, error_json, error_msg
     
     def _format_results_text(self, results: Dict[str, Any]) -> str:
         """Format results as human-readable text"""
@@ -120,6 +133,41 @@ class DFFGradioInterface:
                 text += "  Status: Basic analysis completed\n\n"
             else:
                 text += f"📋 METADATA ANALYSIS: ERROR - {meta_result.get('error', 'Unknown error')}\n\n"
+        
+        # Frequency Layer results
+        if 'Frequency_Layer' in analysis_results:
+            freq_result = analysis_results['Frequency_Layer']
+            if freq_result.get('status') == 'success':
+                text += "🔍 FREQUENCY ANALYSIS:\n"
+                text += f"  Frames Analyzed: {freq_result.get('frames_analyzed', 0)}\n"
+                text += f"  Confidence: {freq_result.get('confidence', 0):.3f}\n"
+                
+                # DCT Analysis
+                dct_analysis = freq_result.get('dct_analysis', {})
+                text += f"  DCT Compression Artifacts: {'DETECTED' if dct_analysis.get('compression_artifacts_detected') else 'None'}\n"
+                text += f"  DCT Blocks Analyzed: {dct_analysis.get('dct_blocks_analyzed', 0)}\n"
+                
+                # FFT Analysis
+                fft_analysis = freq_result.get('fft_analysis', {})
+                text += f"  FFT Anomalies: {'DETECTED' if fft_analysis.get('frequency_anomalies_detected') else 'None'}\n"
+                text += f"  Frequency Consistency: {fft_analysis.get('frequency_consistency', 0):.3f}\n"
+                
+                # Compression Analysis
+                comp_analysis = freq_result.get('compression_analysis', {})
+                text += f"  Multiple Compression: {'DETECTED' if comp_analysis.get('multiple_compression_detected') else 'None'}\n"
+                text += f"  Avg Quality: {comp_analysis.get('average_compression_quality', 0):.3f}\n"
+                
+                # Frequency Anomalies
+                freq_anomalies = freq_result.get('frequency_anomalies', {})
+                text += f"  Manipulation Patterns: {'DETECTED' if freq_anomalies.get('manipulation_detected') else 'None'}\n"
+                text += f"  Anomaly Score: {freq_anomalies.get('average_anomaly_score', 0):.3f}\n"
+                
+                # Summary
+                summary = freq_result.get('summary', {})
+                text += f"  Total Anomalies: {summary.get('total_anomalies_detected', 0)}\n"
+                text += f"  Analysis Quality: {summary.get('analysis_quality', 'unknown')}\n\n"
+            else:
+                text += f"🔍 FREQUENCY ANALYSIS: ERROR - {freq_result.get('error', 'Unknown error')}\n\n"
         
         # Summary
         summary = results.get('summary', {})
@@ -234,9 +282,9 @@ class DFFGradioInterface:
             **Current Implementation:**
             - 🤖 **AI Layer**: GenConViT model for deepfake detection
             - 📋 **Metadata Layer**: Basic file information analysis
+            - 🔍 **Frequency Layer**: DCT/FFT analysis for compression artifacts and frequency anomalies
             
             **Planned Layers:**
-            - 🔍 **Frequency Analysis**: DCT/FFT analysis for compression artifacts
             - 🌍 **Physics Analysis**: Shadow, reflection, and geometry consistency checks
             - 🎯 **Localization**: Spatial anomaly detection and heatmaps
             - 📊 **Explainability**: Attention maps and evidence visualization
